@@ -92,6 +92,20 @@ public class SmartBarView extends BaseNavigationBar {
     static final int IME_HINT_MODE_PICKER = 2;
     static final int IME_AND_MEDIA_HINT_MODE_ARROWS = 3;
 
+
+    //OPA values
+    private static final int COLLAPSE_ANIMATION_DURATION_RY = 83;
+    private static final int COLLAPSE_ANIMATION_DURATION_BG = 100;
+    private static final int LINE_ANIMATION_DURATION_Y = 275;
+    private static final int LINE_ANIMATION_DURATION_X = 133;
+    private static final int RETRACT_ANIMATION_DURATION = 300;
+    private static final int DIAMOND_ANIMATION_DURATION = 200;
+    private static final int HALO_ANIMATION_DURATION = 100;
+
+    private static final int DOTS_RESIZE_DURATION = 200;
+    private static final int HOME_RESIZE_DURATION = 83;
+    private static Context ctx;
+
     private static Set<Uri> sUris = new HashSet<Uri>();
     static {
         sUris.add(Settings.Secure.getUriFor("smartbar_context_menu_mode"));
@@ -102,6 +116,15 @@ public class SmartBarView extends BaseNavigationBar {
         sUris.add(Settings.Secure.getUriFor(Settings.Secure.SMARTBAR_LONGPRESS_DELAY));
         sUris.add(Settings.Secure.getUriFor(Settings.Secure.SMARTBAR_CUSTOM_ICON_SIZE));
         sUris.add(Settings.Secure.getUriFor(Settings.Secure.SMARTBAR_DOUBLETAP_SLEEP));
+        sUris.add(Settings.Secure.getUriFor(Settings.Secure.ONE_HANDED_MODE_UI));
+        sUris.add(Settings.System.getUriFor(Settings.System.OPA_ANIM_DURATION_Y));
+        sUris.add(Settings.System.getUriFor(Settings.System.OPA_ANIM_DURATION_X));
+        sUris.add(Settings.System.getUriFor(Settings.System.COLLAPSE_ANIMATION_DURATION_BG));
+        sUris.add(Settings.System.getUriFor(Settings.System.COLLAPSE_ANIMATION_DURATION_RY));
+        sUris.add(Settings.System.getUriFor(Settings.System.RETRACT_ANIMATION_DURATION));
+        sUris.add(Settings.System.getUriFor(Settings.System.DIAMOND_ANIMATION_DURATION));
+        sUris.add(Settings.System.getUriFor(Settings.System.DOTS_RESIZE_DURATION));
+        sUris.add(Settings.System.getUriFor(Settings.System.HOME_RESIZE_DURATION));
     }
 
     private SmartObservable mObservable = new SmartObservable() {
@@ -131,6 +154,24 @@ public class SmartBarView extends BaseNavigationBar {
                 reapplyDarkIntensity();
             } else if (uri.equals(Settings.Secure.getUriFor(Settings.Secure.SMARTBAR_DOUBLETAP_SLEEP))) {
                 updateNavDoubletapSetting();
+            } else if (uri.equals(Settings.Secure.getUriFor(Settings.Secure.ONE_HANDED_MODE_UI))) {
+                updateOneHandedModeSetting();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.OPA_ANIM_DURATION_Y))) {
+                setYAnimationDuration();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.OPA_ANIM_DURATION_X))) {
+                setXAnimationDuration();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.COLLAPSE_ANIMATION_DURATION_BG))) {
+                setBGAnimationDuration();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.COLLAPSE_ANIMATION_DURATION_RY))) {
+                setRYAnimationDuration();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.RETRACT_ANIMATION_DURATION))) {
+                setRetractAnimationDuration();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.DIAMOND_ANIMATION_DURATION))) {
+                setDiamondAnimationDuration();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.DOTS_RESIZE_DURATION))) {
+                setDotsAnimationDuration();
+            } else if (uri.equals(Settings.System.getUriFor(Settings.System.HOME_RESIZE_DURATION))) {
+                setHomeResizeAnimationDuration();
             }
         }
     };
@@ -188,10 +229,12 @@ public class SmartBarView extends BaseNavigationBar {
 
     public SmartBarView(Context context) {
         super(context);
+        ctx = context;
         mBarTransitions = new SmartBarTransitions(this);
         mEditor = new SmartBarEditor(this);
         mSmartObserver.addListener(mObservable);
         createBaseViews();
+        SetOpaDurations();
 
         mAudioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
         mMusicStreamMuted = isMusicMuted(AudioManager.STREAM_MUSIC);
@@ -897,5 +940,73 @@ public class SmartBarView extends BaseNavigationBar {
         int iconSize = Settings.Secure.getIntForUser(getContext().getContentResolver(),
                 Settings.Secure.SMARTBAR_CUSTOM_ICON_SIZE, 60, UserHandle.USER_CURRENT);
         mCustomIconScale = 0.01f * iconSize;
+    }
+
+    public void  setYAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.OPA_ANIM_DURATION_Y, LINE_ANIMATION_DURATION_Y,
+                UserHandle.USER_CURRENT);
+      OpaLayout.LINE_ANIMATION_DURATION_Y = dur;
+    }
+
+    public void  setXAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.OPA_ANIM_DURATION_X, LINE_ANIMATION_DURATION_X,
+                UserHandle.USER_CURRENT);
+      OpaLayout.LINE_ANIMATION_DURATION_X = dur;
+    }
+
+    public void  setBGAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.COLLAPSE_ANIMATION_DURATION_BG, COLLAPSE_ANIMATION_DURATION_BG,
+                UserHandle.USER_CURRENT);
+      OpaLayout.COLLAPSE_ANIMATION_DURATION_BG = dur;
+    }
+
+    public void  setRYAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.COLLAPSE_ANIMATION_DURATION_RY, COLLAPSE_ANIMATION_DURATION_RY,
+                UserHandle.USER_CURRENT);
+      OpaLayout.COLLAPSE_ANIMATION_DURATION_RY = dur;
+    }
+
+    public void setRetractAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.RETRACT_ANIMATION_DURATION, RETRACT_ANIMATION_DURATION,
+                UserHandle.USER_CURRENT);
+      OpaLayout.RETRACT_ANIMATION_DURATION = dur;
+
+    }
+
+    public void setDiamondAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.DIAMOND_ANIMATION_DURATION, DIAMOND_ANIMATION_DURATION,
+                UserHandle.USER_CURRENT);
+      OpaLayout.DIAMOND_ANIMATION_DURATION = dur;
+    }
+
+    public void  setDotsAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.DOTS_RESIZE_DURATION, DOTS_RESIZE_DURATION,
+                UserHandle.USER_CURRENT);
+      OpaLayout.DOTS_RESIZE_DURATION = dur;
+    }
+
+    public void  setHomeResizeAnimationDuration() {
+      int dur = Settings.System.getIntForUser(
+                ctx.getContentResolver(), Settings.System.HOME_RESIZE_DURATION, HOME_RESIZE_DURATION,
+                UserHandle.USER_CURRENT);
+      OpaLayout.HOME_RESIZE_DURATION = dur;
+    }
+
+    public void SetOpaDurations() {
+            setYAnimationDuration();
+            setXAnimationDuration();
+            setBGAnimationDuration();
+            setRYAnimationDuration();
+            setRetractAnimationDuration();
+            setDiamondAnimationDuration();
+            setDotsAnimationDuration();
+            setHomeResizeAnimationDuration();
     }
 }
