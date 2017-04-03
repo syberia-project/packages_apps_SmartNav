@@ -25,6 +25,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff.Mode;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Bitmap.Config;
 import android.graphics.PorterDuff.Mode;
@@ -80,7 +81,6 @@ public class FadingBlockRenderer extends Renderer implements ColorAnimator.Color
         mLavaLamp.setColorAnimatorListener(this);
         mPaint = new Paint();
         mFadePaint = new Paint();
-        mFadePaint.setColor(Color.argb(200, 255, 255, 255));
         mFadePaint.setXfermode(new PorterDuffXfermode(Mode.MULTIPLY));
         mMatrix = new Matrix();
         mDbFuzz = mContext.getResources().getInteger(R.integer.config_pulseDbFuzz);
@@ -232,6 +232,9 @@ public class FadingBlockRenderer extends Renderer implements ColorAnimator.Color
                     Settings.Secure.getUriFor(Settings.Secure.PULSE_AUTO_COLOR), false,
                     this,
                     UserHandle.USER_ALL);
+            resolver.registerContentObserver(
+                    Settings.Secure.getUriFor(Settings.Secure.PULSE_FADING_BLOCKS_OPACITY), false, this,
+                    UserHandle.USER_ALL);
         }
 
         @Override
@@ -293,6 +296,11 @@ public class FadingBlockRenderer extends Renderer implements ColorAnimator.Color
             mPaint.setStrokeWidth(getLimitedDimenValue(customDimen, 1, 30, res));
             mDivisions = validateDivision(numDivision);
             mDbFuzzFactor = Math.max(2, Math.min(6, fudgeFactor));
+
+            int fadingBlocksColor = Settings.Secure.getIntForUser(
+                    resolver, Settings.Secure.PULSE_FADING_BLOCKS_OPACITY, 150,
+                    UserHandle.USER_CURRENT);
+            mFadePaint.setColor(Color.argb(fadingBlocksColor, 255, 255, 255));
         }
     }
 
